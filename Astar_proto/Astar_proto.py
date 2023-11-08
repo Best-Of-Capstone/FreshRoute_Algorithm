@@ -1,6 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
+import openrouteservice
 import json
 
 cred = credentials.Certificate\
@@ -20,19 +21,22 @@ doc_sub_trans = db.collection("Transfer3")
 
 for tmp in doc_sub.get():
     map_subway[tmp.id] = tmp.to_dict()
+    map_subway[tmp.id]['id'] = tmp.id
 
 # print(map_subway)
 
 
 class Node:
-    def __init__(self, id=None, line=None, name=None, lat=None, long=None, adj=None):
+    def __init__(self, id=None, line=None, name=None,
+                 latitude=None, longitude=None, parent=None):
         self.id = id
         self.name = name
         self.line = line
 
-        self.lat = lat
-        self.long = long
+        self.latitude = latitude
+        self.longitude = longitude
 
+        self.parent = parent
         self.adj = []
 
         self.g = 0
@@ -40,21 +44,38 @@ class Node:
         self.f = 0
 
     def __eq__(self, other):
-        return self.lat == other.lat and self.long == other.long
-
+        """
+        return self.latitude == other.latitude and self.longitude == other.longitude
+        """
+        if isinstance(other, Node):
+            return self.id == other.id
 
 def heuristic(node, goal):
     # octile distance
-    dx = abs(node.lat - goal.lat)
-    dy = abs(node.long - goal.long)
+    dx = abs(node.latitude - goal.latitude)
+    dy = abs(node.longitude - goal.longitude)
     return (dx + dy) + (2 ** 0.5 - 2) * min(dx, dy)
 
 
-def aStar(maze, start, end):
-    start_node = Node(start)
-    end_node = Node(*end)
-    print(start_node.id)
-    print(end_node.id)
+def set_node(map):
+    node = Node()
+    node.id = map["id"]
+    node.line = map["line"]
+    node.name = map["name"]
+    node.latitude = map["latitude"]
+    node.longitude = map["longitude"]
+    for node_child in map["adj"].values():
+        node.adj.append(node_child)
+    return node
+
+
+def a_star(start, end):
+    start_node = set_node(start)
+    end_node = set_node(end)
+    """
+    print(start_node.id, start_node.adj)
+    print(end_node.id, end_node.adj)
+    """
 
     open_list = []
     closed_list = []
@@ -79,7 +100,8 @@ def aStar(maze, start, end):
             current = current_node
             while current is not None:
                 # x, y = current.position
-                path.append([current.lat, current.long])
+                path.append([current.name,[current.latitude, current.longitude]])
+                # path.append([current.latitude, current.longitude])
                 current = current.parent
             return path[::-1]  # reverse
 
@@ -90,8 +112,8 @@ def aStar(maze, start, end):
 
             # update nodes
             node_position = (
-                current_node.lat + map_subway[new_nodes.id].latitute,  # X
-                current_node.long + map_subway[new_nodes.id].longitute)  # Y
+                map_subway[new_nodes['id']]['latitude'],  # X
+                map_subway[new_nodes['id']]['longitude'])  # Y
 
             # 동작, 관악 범위
             within_range_criteria = [
@@ -105,7 +127,7 @@ def aStar(maze, start, end):
             if any(within_range_criteria):
                 continue
 
-            new_node = Node(current_node, node_position)
+            new_node = set_node(map_subway[new_nodes['id']])
             children.append(new_node)
 
         for child in children:
@@ -128,12 +150,16 @@ def aStar(maze, start, end):
                     if child == openNode and child.g > openNode.g]) > 0:
                 continue
 
+            child.parent = current_node
             open_list.append(child)
 
 
 if __name__ == "__main__":
-    start_node = map_subway['1002']
-    end_node = map_subway['2630']
-    print(start_node)
-    print(end_node)
-    # print(aStar(map_subway, start_node, end_node))
+    start_node = map_subway['2739']
+    end_node = map_subway['2744']
+
+    for tmp in map_subway:
+        if map_subway[tmp]['name'] == '신림':
+            print(tmp)
+
+    print(a_star(start_node, end_node))
