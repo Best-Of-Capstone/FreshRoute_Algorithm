@@ -11,19 +11,54 @@ firebase_admin.initialize_app(cred, {
   'projectId': 'freshroute-b533b',
 })
 
-map_subway = {}
-
 db = firestore.client()
+
+# Reads dict from local json
+with open("./data/bus.json", "r") as bus:
+    map_bus = json.load(bus)
+with open("./data/subway.json", "r") as subway:
+    map_subway = json.load(subway)
+with open("./data/subway_transfer.json", "r") as transfer:
+    map_trans = json.load(transfer)
+
+
+# Reads dict from Firebase
+"""
+map_subway = {}
+map_bus = {}
+map_trans = {}
+
+# Get dictionary from Firebase
 doc_sub = db.collection("SubwayTest10")
 doc_sub_trans = db.collection("Transfer3")
-# doc_ref_sub = doc_sub.document("1002")
-# doc_ref_st = doc_sub_trans.document("1007")
+doc_bus = db.collection("BusStop")
 
 for tmp in doc_sub.get():
     map_subway[tmp.id] = tmp.to_dict()
     map_subway[tmp.id]['id'] = tmp.id
 
+for tmp in doc_bus.get():
+    map_bus[tmp.id] = tmp.to_dict()
+    map_bus[tmp.id]['id'] = tmp.id
+
+for tmp in doc_sub_trans.get():
+    map_trans[tmp.id] = tmp.to_dict()
+    map_trans[tmp.id]['id'] = tmp.id
+"""
+
+
+# Dump Firebase to json (Backups in case which Firebase is blocked)
+"""
+with open('./data/bus.json', 'w') as f:
+    json.dump(map_bus, f, ensure_ascii=False, indent=4)
+with open('./data/subway.json', 'w') as f:
+    json.dump(map_subway, f, ensure_ascii=False, indent=4)
+with open('./data/subway_transfer.json', 'w') as f:
+    json.dump(map_trans, f, ensure_ascii=False, indent=4)
+"""
+
 # print(map_subway)
+# print(map_bus)
 
 
 class Node:
@@ -69,7 +104,7 @@ def set_node(map):
     return node
 
 
-def a_star(start, end):
+def a_star(map, start, end):
     start_node = set_node(start)
     end_node = set_node(end)
     """
@@ -112,8 +147,8 @@ def a_star(start, end):
 
             # update nodes
             node_position = (
-                map_subway[new_nodes['id']]['latitude'],  # X
-                map_subway[new_nodes['id']]['longitude'])  # Y
+                map[new_nodes['id']]['latitude'],  # X
+                map[new_nodes['id']]['longitude'])  # Y
 
             # 동작, 관악 범위
             within_range_criteria = [
@@ -127,7 +162,7 @@ def a_star(start, end):
             if any(within_range_criteria):
                 continue
 
-            new_node = set_node(map_subway[new_nodes['id']])
+            new_node = set_node(map[new_nodes['id']])
             children.append(new_node)
 
         for child in children:
@@ -158,8 +193,10 @@ if __name__ == "__main__":
     start_node = map_subway['2739']
     end_node = map_subway['2744']
 
+    """
     for tmp in map_subway:
         if map_subway[tmp]['name'] == '신림':
             print(tmp)
+    """
 
-    print(a_star(start_node, end_node))
+    print(a_star(map_subway, start_node, end_node))
