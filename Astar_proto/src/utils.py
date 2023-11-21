@@ -34,11 +34,23 @@ def heuristic(node, goal):
     return math.sqrt((dx ** 2) + (dy ** 2))
 
 
-def set_node(map):
+def set_node_subway(map):
     node = Node()
     node.id = map["id"]
     node.line = map["line"]
     node.name = map["name"]
+    node.latitude = map["latitude"]
+    node.longitude = map["longitude"]
+    for node_child in map["adj"].values():
+        node.adj.append(node_child)
+    return node
+
+
+def set_node_bus(map):
+    node = Node()
+    node.id = map["id"]
+    node.line = map["mobile_number"]
+    node.name = map["node_name"]
     node.latitude = map["latitude"]
     node.longitude = map["longitude"]
     for node_child in map["adj"].values():

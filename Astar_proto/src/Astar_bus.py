@@ -2,8 +2,8 @@ from utils import *
 
 
 def a_star_bus(map, start, end):
-    start_node = set_node(start)
-    end_node = set_node(end)
+    start_node = set_node_bus(start)
+    end_node = set_node_bus(end)
     """
     print(start_node.id, start_node.adj)
     print(end_node.id, end_node.adj)
@@ -39,17 +39,9 @@ def a_star_bus(map, start, end):
 
         children = []
 
-        # transfer nodes
-        trans_tmp = []
-        for new_nodes in trans:
-            if trans[new_nodes]['id'] != current_node.id \
-                    and trans[new_nodes]['name'] == current_node.name:
-                new_node = set_node(map[trans[new_nodes]['id']])
-                children.append(new_node)
-
         # adjacent nodes
-        for new_nodes in (current_node.adj or trans_tmp):
-            new_node = set_node(map[new_nodes['id']])
+        for new_nodes in current_node.adj:
+            new_node = set_node_bus(map[new_nodes['NODE_ID']])
             node_position = (
                 map[new_nodes['id']]['latitude'],  # X
                 map[new_nodes['id']]['longitude'])  # Y
@@ -66,9 +58,6 @@ def a_star_bus(map, start, end):
             if any(within_range_criteria):
                 continue
             children.append(new_node)
-
-        for new_nodes in trans_tmp:
-            print(new_nodes.id, new_nodes.name)
 
         for child in children:
             # visited nodes

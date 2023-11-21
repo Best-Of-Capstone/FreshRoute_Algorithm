@@ -71,14 +71,22 @@ with open('./data/subway_transfer.json', 'w') as f:
 
 
 if __name__ == "__main__":
-
+    # subway
+    """
     start_node = map_subway['229']
     end_node = map_subway['2739']
     print(f"Start : {start_node['name']}, End : {end_node['name']}")
+    """
 
-    for tmp in map_subway:
-        if map_subway[tmp]['name'] == '':
+    # bus
+    start_node = map_bus['120000152']
+    end_node = map_bus['119900105']
+    print(f"Start : {start_node['node_name']}, End : {end_node['node_name']}")
+
+    """
+    for tmp in map_bus:
+        if map_bus[tmp]['node_name'] == '구암초등학교':
             print(tmp)
-
-    print(a_star_subway(map_subway, map_trans, start_node, end_node))
-    # print(a_star_bus(map_bus, start_node, end_node))
+    """
+    # print(a_star_subway(map_subway, map_trans, start_node, end_node))
+    print(a_star_bus(map_bus, start_node, end_node))
