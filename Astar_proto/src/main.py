@@ -72,21 +72,28 @@ with open('./data/subway_transfer.json', 'w') as f:
 
 if __name__ == "__main__":
     # subway
-    """
+
     start_node = map_subway['229']
     end_node = map_subway['2739']
     print(f"Start : {start_node['name']}, End : {end_node['name']}")
-    """
+
 
     # bus
+    """
+    map_bus = convert_bus(map_bus)
     start_node = map_bus['120000152']
     end_node = map_bus['119900105']
-    print(f"Start : {start_node['node_name']}, End : {end_node['node_name']}")
+    pp = pprint.PrettyPrinter(depth=4)
+    """
+
+    # pp.pprint(start_node)
+    # pp.pprint(end_node)
+    # print(f"Start : {start_node['node_name']}, End : {end_node['node_name']}")
 
     """
     for tmp in map_bus:
         if map_bus[tmp]['node_name'] == '구암초등학교':
             print(tmp)
     """
-    # print(a_star_subway(map_subway, map_trans, start_node, end_node))
-    print(a_star_bus(map_bus, start_node, end_node))
+    print(a_star_subway(map_subway, map_trans, start_node, end_node, cnt=1))
+    # print(a_star_bus(map_bus, start_node, end_node, cnt=2))
