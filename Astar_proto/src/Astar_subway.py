@@ -1,7 +1,7 @@
 from utils import *
 
 
-def a_star_subway(map, trans, start, end, cnt):
+def a_star_subway(map, trans, start, end):
     start_node = set_node_subway(start)
     end_node = set_node_subway(end)
     """
@@ -11,7 +11,6 @@ def a_star_subway(map, trans, start, end, cnt):
 
     open_list = []
     closed_list = []
-    path_list = []
 
     open_list.append(start_node)
 
@@ -33,12 +32,10 @@ def a_star_subway(map, trans, start, end, cnt):
             current = current_node
             while current is not None:
                 # x, y = current.position
-                path.append([current.name, [current.latitude, current.longitude]])
+                path.append([current.name,[current.latitude, current.longitude]])
                 # path.append([current.latitude, current.longitude])
                 current = current.parent
-            path_list.append(path[::-1])  # reverse
-            if len(path_list) == cnt:
-                return path_list
+            return path[::-1]  # reverse
 
         children = []
 

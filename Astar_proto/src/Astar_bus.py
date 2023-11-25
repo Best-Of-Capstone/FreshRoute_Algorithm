@@ -1,7 +1,7 @@
 from utils import *
 
 
-def a_star_bus(map, start, end, cnt):
+def a_star_bus(map, start, end):
     start_node = set_node_bus(start)
     end_node = set_node_bus(end)
     """
@@ -11,7 +11,6 @@ def a_star_bus(map, start, end, cnt):
 
     open_list = []
     closed_list = []
-    path_list = []
 
     open_list.append(start_node)
 
@@ -36,9 +35,7 @@ def a_star_bus(map, start, end, cnt):
                 path.append([current.name, [current.latitude, current.longitude]])
                 # path.append([current.latitude, current.longitude])
                 current = current.parent
-            path_list.append(path[::-1])  # reverse
-            if len(path_list) == cnt:
-                return path_list
+            return path[::-1]  # reverse
 
         children = []
 

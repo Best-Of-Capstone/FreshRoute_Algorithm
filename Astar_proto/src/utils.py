@@ -57,8 +57,14 @@ def set_node_bus(map):
         node.adj.append(node_child)
     return node
 
-def combine_graph():
 
+def combine_graph():
+    # combines all subway and bus graphs :
+    # discontinued due to efficiency issues
+    return
+
+
+def transfer_subway_bus():
     return
 
 
@@ -79,7 +85,7 @@ def convert_bus(map_bus):
                 map_bus[tmp]['adj'][tmp2]['id'] = str(map_bus[tmp]['adj'][tmp2].pop('NODE_ID'))
                 map_bus[tmp]['adj'][tmp2]['latitude'] = map_bus[tmp]['adj'][tmp2].pop('Y좌표')
                 map_bus[tmp]['adj'][tmp2]['longitude'] = map_bus[tmp]['adj'][tmp2].pop('X좌표')
-                map_bus[tmp]['adj'][tmp2]['node_name'] = map_bus[tmp]['adj'][tmp2].pop('정류소명')
+                map_bus[tmp]['adj'][tmp2]['name'] = map_bus[tmp]['adj'][tmp2].pop('정류소명')
                 map_bus[tmp]['adj'][tmp2]['line'] = map_bus[tmp]['adj'][tmp2].pop('노선명')
                 map_bus[tmp]['adj'][tmp2]['ars_id'] = map_bus[tmp]['adj'][tmp2].pop('ARS_ID')
                 map_bus[tmp]['adj'][tmp2]['route_id'] = str(map_bus[tmp]['adj'][tmp2].pop('ROUTE_ID'))

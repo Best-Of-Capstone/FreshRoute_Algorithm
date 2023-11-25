@@ -1,3 +1,4 @@
+import math
 import os
 
 import firebase_admin
@@ -9,6 +10,7 @@ import pprint
 
 from Astar_subway import *
 from Astar_bus import *
+from Astar_combined import *
 
 cred = credentials.Certificate\
     ("gcp-credentials.json")
@@ -19,13 +21,15 @@ firebase_admin.initialize_app(cred, {
 
 db = firestore.client()
 
-print(os.getcwd())
+# print(os.getcwd())
+
 # Reads dict from local json
-with open("data/bus.json", "r") as bus:
+
+with open("../data/bus.json", "r") as bus:
     map_bus = json.load(bus)
-with open("data/subway.json", "r") as subway:
+with open("../data/subway.json", "r") as subway:
     map_subway = json.load(subway)
-with open("data/subway_transfer.json", "r") as transfer:
+with open("../data/subway_transfer.json", "r") as transfer:
     map_trans = json.load(transfer)
 
 
@@ -70,30 +74,33 @@ with open('./data/subway_transfer.json', 'w') as f:
 # print(map_bus)
 
 
+def find_closest_transportation(coord):
+    min_dist = math.inf
+    closest_node = None
+
+    for key, point in map_bus.items():
+        tmp = (coord[0] - point['latitude']) ** 2 + (coord[1] - point['longitude']) ** 2
+        if tmp < min_dist:
+            min_dist = tmp
+            closest_node = map_bus[key]
+    for key, point in map_subway.items():
+        tmp = (coord[0] - point['latitude']) ** 2 + (coord[1] - point['longitude']) ** 2
+        if tmp < min_dist:
+            min_dist = tmp
+            closest_node = map_subway[key]
+    return closest_node
+
+
+def get_route_between_coordinates(start, end, target_count=1):
+    start = find_closest_transportation(start)
+    end = find_closest_transportation(end)
+    return a_star_combined(map_subway, map_trans, map_bus, start, end)
+
+
 if __name__ == "__main__":
-    # subway
+    start = [37.49200, 126.94798]
+    end = [37.50385, 126.95789]
 
-    start_node = map_subway['229']
-    end_node = map_subway['2739']
-    print(f"Start : {start_node['name']}, End : {end_node['name']}")
-
-
-    # bus
-    """
-    map_bus = convert_bus(map_bus)
-    start_node = map_bus['120000152']
-    end_node = map_bus['119900105']
-    pp = pprint.PrettyPrinter(depth=4)
-    """
-
-    # pp.pprint(start_node)
-    # pp.pprint(end_node)
-    # print(f"Start : {start_node['node_name']}, End : {end_node['node_name']}")
-
-    """
-    for tmp in map_bus:
-        if map_bus[tmp]['node_name'] == '구암초등학교':
-            print(tmp)
-    """
-    print(a_star_subway(map_subway, map_trans, start_node, end_node, cnt=1))
-    # print(a_star_bus(map_bus, start_node, end_node, cnt=2))
+    get_route_between_coordinates(start, end)
+    # print(a_star_subway(map_subway, map_trans, start_node, end_node))
+    # print(a_star_bus(map_bus, start_node, end_node))
