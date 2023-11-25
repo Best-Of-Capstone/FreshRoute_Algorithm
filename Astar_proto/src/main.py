@@ -103,14 +103,15 @@ def find_closest_transportation(coord):
 
 
 def get_route_between_coordinates(start, end, target_count=1):
-    start_near = find_closest_transportation(start)[0]
-    end_near = find_closest_transportation(end)[0]
+    route = []
+    start_near = find_closest_transportation(start)[1]
+    end_near = find_closest_transportation(end)[1]
     # print(start.name, end.name)
-    print([start, [start_near.latitude, start_near.longitude]])
-    route = route_list(start, start_near)
-    # route.insert(0, a_star_combined(map_subway, map_trans, map_bus, start_near, end_near))
-
-    return
+    # print([start, [start_near.latitude, start_near.longitude]])
+    route.append(route_list_start(start, start_near))
+    route.insert(1, a_star_combined(map_subway, map_trans, map_bus, start_near, end_near))
+    route.append(route_list_end(end_near, end))
+    return route
 
 
 if __name__ == "__main__":
@@ -125,7 +126,7 @@ if __name__ == "__main__":
     """
     start = [37.49602, 126.953822]
     end = [37.48236, 126.94189]
-    get_route_between_coordinates(start, end)
+    print(get_route_between_coordinates(start, end))
 
     # print(a_star_subway(map_subway, map_trans, start_node, end_node))
     # print(a_star_bus(map_bus, start_node, end_node))

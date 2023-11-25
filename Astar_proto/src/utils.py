@@ -103,13 +103,21 @@ def convert_bus(map_bus):
     return map_bus
 
 
-def route_list(node1, node2):
+def route_list_start(node1, node2):
     foo = directions(client, coordinates=[node1[::-1], [node2.longitude, node2.latitude]],
-                     profile='foot-walking', format='geojson')
+                     profile='foot-walking', format='geojson')['features']
+    """
     route = directions(client, coordinates=[node1[::-1], [node2.longitude, node2.latitude]],
                        profile='foot-walking', format='geojson')['features'][0]['geometry']['coordinates']
     tmp = directions(client, coordinates=[node1[::-1], [node2.longitude, node2.latitude]],
                      profile='foot-walking', format='geojson')['features'][0]['properties']['segments']
-    pp.pprint(foo)
-    pp.pprint(route)
-    pp.pprint(tmp)
+    """
+    # pp.pprint(foo)
+    return foo
+
+
+def route_list_end(node1, node2):
+    foo = directions(client, coordinates=[node2[::-1], [node1.longitude, node1.latitude]],
+                     profile='foot-walking', format='geojson')['features']
+    # pp.pprint(foo)
+    return foo
