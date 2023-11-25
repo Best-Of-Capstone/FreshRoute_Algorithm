@@ -3,10 +3,11 @@ import math
 
 class Node:
     def __init__(self, id=None, line=None, name=None,
-                 latitude=None, longitude=None, parent=None):
+                 latitude=None, longitude=None, parent=None, type=None):
         self.id = id
         self.name = name
         self.line = line
+        self.type = type
 
         self.latitude = latitude
         self.longitude = longitude
@@ -41,6 +42,7 @@ def set_node_subway(map):
     node.name = map["name"]
     node.latitude = map["latitude"]
     node.longitude = map["longitude"]
+    node.type = "subway"
     for node_child in map["adj"].values():
         node.adj.append(node_child)
     return node
@@ -49,10 +51,11 @@ def set_node_subway(map):
 def set_node_bus(map):
     node = Node()
     node.id = map["id"]
-    node.name = map["node_name"]
+    node.name = map["name"]
     node.mobile = map["ars_id"]
     node.latitude = map["latitude"]
     node.longitude = map["longitude"]
+    node.type = "bus"
     for node_child in map["adj"].values():
         node.adj.append(node_child)
     return node
@@ -64,7 +67,7 @@ def combine_graph():
     return
 
 
-def transfer_subway_bus():
+def transfer_subway_bus(current_node):
     return
 
 
@@ -80,6 +83,7 @@ def convert_bus(map_bus):
     for tmp in map_bus:
         map_bus[tmp]['id'] = map_bus[tmp].pop('id')
         map_bus[tmp]['ars_id'] = map_bus[tmp].pop('mobile_number')
+        map_bus[tmp]['name'] = map_bus[tmp].pop('node_name')
         try:
             for tmp2 in map_bus[tmp]['adj']:
                 map_bus[tmp]['adj'][tmp2]['id'] = str(map_bus[tmp]['adj'][tmp2].pop('NODE_ID'))

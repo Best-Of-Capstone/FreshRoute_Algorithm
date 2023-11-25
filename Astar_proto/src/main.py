@@ -1,5 +1,8 @@
 import math
 import os
+import sys
+import time
+sys.setrecursionlimit(2000)
 
 import firebase_admin
 from firebase_admin import credentials
@@ -12,6 +15,7 @@ from Astar_subway import *
 from Astar_bus import *
 from Astar_combined import *
 
+"""
 cred = credentials.Certificate\
     ("gcp-credentials.json")
 
@@ -20,13 +24,17 @@ firebase_admin.initialize_app(cred, {
 })
 
 db = firestore.client()
-
+"""
 # print(os.getcwd())
 
 # Reads dict from local json
 
+global map_bus
+global map_subway
+global map_trans
+
 with open("../data/bus.json", "r") as bus:
-    map_bus = json.load(bus)
+    map_bus = convert_bus(json.load(bus))
 with open("../data/subway.json", "r") as subway:
     map_subway = json.load(subway)
 with open("../data/subway_transfer.json", "r") as transfer:
@@ -76,31 +84,49 @@ with open('./data/subway_transfer.json', 'w') as f:
 
 def find_closest_transportation(coord):
     min_dist = math.inf
-    closest_node = None
+    closest_node = [[] for _ in range(2)]
 
     for key, point in map_bus.items():
         tmp = (coord[0] - point['latitude']) ** 2 + (coord[1] - point['longitude']) ** 2
-        if tmp < min_dist:
+        if tmp < min_dist and "adj" in map_bus[key]:
             min_dist = tmp
-            closest_node = map_bus[key]
+            closest_node[0] = set_node_bus(map_bus[key])
+            # print(min_dist, point['latitude'], point['longitude'])
+    min_dist = math.inf
     for key, point in map_subway.items():
-        tmp = (coord[0] - point['latitude']) ** 2 + (coord[1] - point['longitude']) ** 2
-        if tmp < min_dist:
-            min_dist = tmp
-            closest_node = map_subway[key]
+        tmp2 = (coord[0] - point['latitude']) ** 2 + (coord[1] - point['longitude']) ** 2
+        if tmp2 < min_dist and "adj" in map_subway[key]:
+            min_dist = tmp2
+            closest_node[1] = set_node_subway(map_subway[key])
+            # print(min_dist, point['latitude'], point['longitude'])
     return closest_node
 
 
 def get_route_between_coordinates(start, end, target_count=1):
-    start = find_closest_transportation(start)
-    end = find_closest_transportation(end)
-    return a_star_combined(map_subway, map_trans, map_bus, start, end)
+    start = find_closest_transportation(start)[0]
+    end = find_closest_transportation(end)[0]
+    # print(start.name, end.name)
+
+    route = a_star_combined(map_subway, map_trans, map_bus, start, end)
+    print(route)
+    return
 
 
 if __name__ == "__main__":
-    start = [37.49200, 126.94798]
-    end = [37.50385, 126.95789]
-
+    # time_start = time.time()
+    """
+    start = [37.48918, 126.94612]
+    end = [37.50501, 126.95398]
+    """
+    """
+    start = [37.49602, 126.953822]
+    end = [37.48236, 126.94189]
+    """
+    start = [37.48918, 126.94612]
+    end = [37.50501, 126.95398]
     get_route_between_coordinates(start, end)
+
     # print(a_star_subway(map_subway, map_trans, start_node, end_node))
     # print(a_star_bus(map_bus, start_node, end_node))
+
+    # print(time.time() - time_start)

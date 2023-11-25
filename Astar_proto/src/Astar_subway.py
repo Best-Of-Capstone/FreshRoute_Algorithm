@@ -2,12 +2,8 @@ from utils import *
 
 
 def a_star_subway(map, trans, start, end):
-    start_node = set_node_subway(start)
-    end_node = set_node_subway(end)
-    """
-    print(start_node.id, start_node.adj)
-    print(end_node.id, end_node.adj)
-    """
+    start_node = start
+    end_node = end
 
     open_list = []
     closed_list = []
@@ -48,7 +44,9 @@ def a_star_subway(map, trans, start, end):
                 children.append(new_node)
 
         # adjacent nodes
-        for new_nodes in (current_node.adj or trans_tmp):
+        for new_nodes in current_node.adj:
+            if new_nodes['id'] not in map:
+                continue
             new_node = set_node_subway(map[new_nodes['id']])
             node_position = (
                 map[new_nodes['id']]['latitude'],  # X
@@ -91,3 +89,4 @@ def a_star_subway(map, trans, start, end):
 
             child.parent = current_node
             open_list.append(child)
+    return []

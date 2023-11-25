@@ -2,8 +2,10 @@ from utils import *
 
 
 def a_star_bus(map, start, end):
-    start_node = set_node_bus(start)
-    end_node = set_node_bus(end)
+    # start_node = set_node_bus(start)
+    # end_node = set_node_bus(end)
+    start_node = start
+    end_node = end
     """
     print(start_node.id, start_node.adj)
     print(end_node.id, end_node.adj)
@@ -41,6 +43,8 @@ def a_star_bus(map, start, end):
 
         # adjacent nodes
         for new_nodes in current_node.adj:
+            if new_nodes['id'] not in map:
+                continue
             new_node = set_node_bus(map[new_nodes['id']])
             node_position = (
                 map[new_nodes['id']]['latitude'],  # X
@@ -80,3 +84,4 @@ def a_star_bus(map, start, end):
 
             child.parent = current_node
             open_list.append(child)
+    return []
