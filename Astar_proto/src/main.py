@@ -7,13 +7,12 @@ sys.setrecursionlimit(2000)
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-import openrouteservice
 import json
-import pprint
 
 from Astar_subway import *
 from Astar_bus import *
 from Astar_combined import *
+from utils import *
 
 """
 cred = credentials.Certificate\
@@ -25,6 +24,7 @@ firebase_admin.initialize_app(cred, {
 
 db = firestore.client()
 """
+
 # print(os.getcwd())
 
 # Reads dict from local json
@@ -76,7 +76,7 @@ with open('./data/subway_transfer.json', 'w') as f:
     json.dump(map_trans, f, ensure_ascii=False, indent=4)
 """
 
-# pp = pprint.PrettyPrinter(depth=4)
+pp = pprint.PrettyPrinter(depth=4)
 # pp.pprint(map_subway)
 # pp.pprint(map_trans)
 # print(map_bus)
@@ -103,12 +103,13 @@ def find_closest_transportation(coord):
 
 
 def get_route_between_coordinates(start, end, target_count=1):
-    start = find_closest_transportation(start)[0]
-    end = find_closest_transportation(end)[0]
+    start_near = find_closest_transportation(start)[0]
+    end_near = find_closest_transportation(end)[0]
     # print(start.name, end.name)
+    print([start, [start_near.latitude, start_near.longitude]])
+    route = route_list(start, start_near)
+    # route.insert(0, a_star_combined(map_subway, map_trans, map_bus, start_near, end_near))
 
-    route = a_star_combined(map_subway, map_trans, map_bus, start, end)
-    print(route)
     return
 
 
@@ -122,8 +123,8 @@ if __name__ == "__main__":
     start = [37.49602, 126.953822]
     end = [37.48236, 126.94189]
     """
-    start = [37.48918, 126.94612]
-    end = [37.50501, 126.95398]
+    start = [37.49602, 126.953822]
+    end = [37.48236, 126.94189]
     get_route_between_coordinates(start, end)
 
     # print(a_star_subway(map_subway, map_trans, start_node, end_node))

@@ -1,5 +1,10 @@
 import math
+import pprint
+import openrouteservice
+from openrouteservice.directions import directions
 
+pp = pprint.PrettyPrinter(depth=4)
+client = openrouteservice.Client(key='5b3ce3597851110001cf6248bf35ccb6f651450ea5bd337af3e428d1')
 
 class Node:
     def __init__(self, id=None, line=None, name=None,
@@ -96,3 +101,15 @@ def convert_bus(map_bus):
         except:
             print("", end='')
     return map_bus
+
+
+def route_list(node1, node2):
+    foo = directions(client, coordinates=[node1[::-1], [node2.longitude, node2.latitude]],
+                     profile='foot-walking', format='geojson')
+    route = directions(client, coordinates=[node1[::-1], [node2.longitude, node2.latitude]],
+                       profile='foot-walking', format='geojson')['features'][0]['geometry']['coordinates']
+    tmp = directions(client, coordinates=[node1[::-1], [node2.longitude, node2.latitude]],
+                     profile='foot-walking', format='geojson')['features'][0]['properties']['segments']
+    pp.pprint(foo)
+    pp.pprint(route)
+    pp.pprint(tmp)
