@@ -1,7 +1,7 @@
 from utils import *
 from Astar_bus import *
 from Astar_subway import *
-from main import find_closest_transportation
+from utils import *
 
 
 def a_star_combined(map_subway, map_trans, map_bus, start_node, end_node, target_count=1):
@@ -37,7 +37,7 @@ def a_star_combined(map_subway, map_trans, map_bus, start_node, end_node, target
                     continue
                 children.append(new_node)
             for child in children:
-                print(find_closest_transportation([child.latitude, child.longitude])[0].name)
+                print(find_closest_transportation(map_bus, map_subway, [child.latitude, child.longitude])[0].name)
                 if a_star_bus(map_bus, child, end_node) is not None:
                     return a_star_bus(map_bus, child, end_node).insert(
                         0, [start_node.name, [start_node.latitude, start_node.longitude]])
@@ -65,7 +65,7 @@ def a_star_combined(map_subway, map_trans, map_bus, start_node, end_node, target
                     continue
                 children.append(new_node)
             for child in children:
-                print(find_closest_transportation([child.latitude, child.longitude])[1].name)
+                print(find_closest_transportation(map_bus, map_subway, [child.latitude, child.longitude])[1].name)
                 if a_star_subway(map_subway, map_trans, child, end_node) is not None:
                     return a_star_subway(map_subway, map_trans, child, end_node).insert(
                         0, [start_node.name, [start_node.latitude, start_node.longitude]])

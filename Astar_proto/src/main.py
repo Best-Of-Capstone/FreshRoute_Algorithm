@@ -2,17 +2,19 @@ import math
 import os
 import sys
 import time
-sys.setrecursionlimit(2000)
-
 import firebase_admin
+import json
+
+
 from firebase_admin import credentials
 from firebase_admin import firestore
-import json
 
 from Astar_subway import *
 from Astar_bus import *
 from Astar_combined import *
 from utils import *
+
+sys.setrecursionlimit(2000)
 
 """
 cred = credentials.Certificate\
@@ -28,10 +30,6 @@ db = firestore.client()
 # print(os.getcwd())
 
 # Reads dict from local json
-
-global map_bus
-global map_subway
-global map_trans
 
 with open("../data/bus.json", "r") as bus:
     map_bus = convert_bus(json.load(bus))
@@ -82,36 +80,70 @@ pp = pprint.PrettyPrinter(depth=4)
 # print(map_bus)
 
 
-def find_closest_transportation(coord):
-    min_dist = math.inf
-    closest_node = [[] for _ in range(2)]
-
-    for key, point in map_bus.items():
-        tmp = (coord[0] - point['latitude']) ** 2 + (coord[1] - point['longitude']) ** 2
-        if tmp < min_dist and "adj" in map_bus[key]:
-            min_dist = tmp
-            closest_node[0] = set_node_bus(map_bus[key])
-            # print(min_dist, point['latitude'], point['longitude'])
-    min_dist = math.inf
-    for key, point in map_subway.items():
-        tmp2 = (coord[0] - point['latitude']) ** 2 + (coord[1] - point['longitude']) ** 2
-        if tmp2 < min_dist and "adj" in map_subway[key]:
-            min_dist = tmp2
-            closest_node[1] = set_node_subway(map_subway[key])
-            # print(min_dist, point['latitude'], point['longitude'])
-    return closest_node
-
-
-def get_route_between_coordinates(start, end, target_count=1):
-    route = []
-    start_near = find_closest_transportation(start)[1]
-    end_near = find_closest_transportation(end)[1]
+def get_route_between_coord(start, end, target_count=1):
+    route = {"RESULT_CODE": 200, "RESULT_MSG": "OK", "RESULT_DATA": {"routeList": []}}
+    start_near = find_closest_transportation(map_bus, map_subway, start)[1]
+    end_near = find_closest_transportation(map_bus, map_subway, end)[1]
     # print(start.name, end.name)
     # print([start, [start_near.latitude, start_near.longitude]])
-    route.append(route_list_start(start, start_near))
-    route.insert(1, a_star_combined(map_subway, map_trans, map_bus, start_near, end_near))
-    route.append(route_list_end(end_near, end))
-    return route
+    return route_to_format(route, target_count, start, start_near, end, end_near)
+
+
+def route_to_format(result, target_count, start, start_near, end, end_near):
+    start_route = route_list_start(start, start_near)
+    public_route = a_star_combined(map_subway, map_trans, map_bus, start_near, end_near)
+    end_route = route_list_end(end_near, end)
+
+    for i in range(target_count):
+        # start
+        for j, route in enumerate(start_route):
+            # print(route)
+            route_dict = {
+                "id": i,
+                "description": f"Route {i}",
+                "route": {
+                    "distance": route["properties"]["summary"]["distance"],
+                    "duration": route["properties"]["summary"]["duration"],
+                    "steps": [],
+                    "coordinates": route["geometry"]["coordinates"]
+                }
+            }
+            for step in route["properties"]["segments"][0]["steps"]:
+                step_dict = {
+                    "distance": step["distance"],
+                    "duration": step["duration"],
+                    "type": step["type"],
+                    "name": step["instruction"],
+                    "wayPoints": step["way_points"]
+                }
+                route_dict["route"]["steps"].append(step_dict)
+            result["RESULT_DATA"]["routeList"].append(route_dict)
+        # public transportation route
+
+        # end
+        for j, route in enumerate(end_route):
+            route_dict = {
+                "id": i,
+                "description": f"Route {i}",
+                "route": {
+                    "distance": route["properties"]["summary"]["distance"],
+                    "duration": route["properties"]["summary"]["duration"],
+                    "steps": [],
+                    "coordinates": route["geometry"]["coordinates"]
+                }
+            }
+            for step in route["properties"]["segments"][0]["steps"]:
+                step_dict = {
+                    "distance": step["distance"],
+                    "duration": step["duration"],
+                    "type": step["type"],
+                    "name": step["instruction"],
+                    "wayPoints": step["way_points"]
+                }
+                route_dict["route"]["steps"].append(step_dict)
+            result["RESULT_DATA"]["routeList"].append(route_dict)
+
+    return result
 
 
 if __name__ == "__main__":
@@ -126,9 +158,12 @@ if __name__ == "__main__":
     """
     start = [37.49602, 126.953822]
     end = [37.48236, 126.94189]
-    print(get_route_between_coordinates(start, end))
-
+    route_list = get_route_between_coord(start, end)
+    pp.pprint(route_list)
     # print(a_star_subway(map_subway, map_trans, start_node, end_node))
     # print(a_star_bus(map_bus, start_node, end_node))
 
     # print(time.time() - time_start)
+
+    with open('route_list.json', 'w') as f:
+        json.dump(route_list, f, indent=4)
