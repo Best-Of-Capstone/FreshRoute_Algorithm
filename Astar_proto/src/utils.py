@@ -1,10 +1,11 @@
-import math
 import pprint
 import openrouteservice
 from openrouteservice.directions import directions
+from math import *
 
 pp = pprint.PrettyPrinter(depth=4)
 client = openrouteservice.Client(key='5b3ce3597851110001cf6248bf35ccb6f651450ea5bd337af3e428d1')
+
 
 class Node:
     def __init__(self, id=None, line=None, name=None,
@@ -37,7 +38,7 @@ def heuristic(node, goal):
     dy = abs(node.longitude - goal.longitude)
     # octile distance
     # return (dx + dy) + (2 ** 0.5 - 2) * min(dx, dy)
-    return math.sqrt((dx ** 2) + (dy ** 2))
+    return sqrt((dx ** 2) + (dy ** 2))
 
 
 def set_node_subway(map):
@@ -121,3 +122,43 @@ def route_list_end(node1, node2):
                      profile='foot-walking', format='geojson')['features']
     # pp.pprint(foo)
     return foo
+
+
+def find_closest_transportation(map_bus, map_subway, coord):
+    min_dist = inf
+    closest_node = [[] for _ in range(2)]
+
+    for key, point in map_bus.items():
+        tmp = (coord[0] - point['latitude']) ** 2 + (coord[1] - point['longitude']) ** 2
+        if tmp < min_dist and "adj" in map_bus[key]:
+            min_dist = tmp
+            closest_node[0] = set_node_bus(map_bus[key])
+            # print(min_dist, point['latitude'], point['longitude'])
+    min_dist = inf
+    for key, point in map_subway.items():
+        tmp2 = (coord[0] - point['latitude']) ** 2 + (coord[1] - point['longitude']) ** 2
+        if tmp2 < min_dist and "adj" in map_subway[key]:
+            min_dist = tmp2
+            closest_node[1] = set_node_subway(map_subway[key])
+            # print(min_dist, point['latitude'], point['longitude'])
+    return closest_node
+
+
+# Haversine function implemented without importing
+# due to compatibility with numpy
+def haversine(lon1, lat1, lon2, lat2):
+    """
+    Calculate the great circle distance in kilometers between two points
+    on the earth (specified in decimal degrees)
+    """
+    # convert decimal degrees to radians
+    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    # haversine formula
+    d_lon = lon2 - lon1
+    d_lat = lat2 - lat1
+    a = sin(d_lat/2) ** 2 + cos(lat1) * cos(lat2) * sin(d_lon/2) ** 2
+    c = 2 * asin(sqrt(a))
+    # Radius of earth in meters. Use 3956 for miles.
+    # Determines return value units.
+    r = 6371
+    return c * r * 1000

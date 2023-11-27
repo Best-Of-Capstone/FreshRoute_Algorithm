@@ -34,7 +34,7 @@ def a_star_bus(map, start, end):
             current = current_node
             while current is not None:
                 # x, y = current.position
-                path.append([current.name, [current.latitude, current.longitude]])
+                path.append([current.name, [current.latitude, current.longitude], "bus"])
                 # path.append([current.latitude, current.longitude])
                 current = current.parent
             return path[::-1]  # reverse
