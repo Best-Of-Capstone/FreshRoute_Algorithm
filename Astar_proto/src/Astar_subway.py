@@ -28,7 +28,7 @@ def a_star_subway(map, trans, start, end):
             current = current_node
             while current is not None:
                 # x, y = current.position
-                path.append([current.name, [current.latitude, current.longitude], "subway"])
+                path.append([current.name, [current.latitude, current.longitude], "subway", current.line])
                 # path.append([current.latitude, current.longitude])
                 current = current.parent
             return path[::-1]  # reverse
