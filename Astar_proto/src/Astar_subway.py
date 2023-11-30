@@ -77,7 +77,7 @@ def a_star_subway(map, trans, start, end):
             child.g = current_node.g + 1
             # child.h = ((child.position[0] - end_node.position[0]) **
             #            2) + ((child.position[1] - end_node.position[1]) ** 2)
-            child.h = heuristic(child, end_node)
+            child.h = heuristic(child, end_node, current_node)
             # print("position:", child.position)
             # print("from child to goal:", child.h)
 
