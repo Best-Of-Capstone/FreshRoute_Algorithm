@@ -1,7 +1,7 @@
 from utils import *
 
 
-def a_star_bus(map, start, end):
+def a_star_bus(map, start, end, target_count=1):
     # start_node = set_node_bus(start)
     # end_node = set_node_bus(end)
     start_node = start
@@ -13,6 +13,7 @@ def a_star_bus(map, start, end):
 
     open_list = []
     closed_list = []
+    path_list = []
 
     open_list.append(start_node)
 
@@ -72,7 +73,7 @@ def a_star_bus(map, start, end):
             child.g = current_node.g + 1
             # child.h = ((child.position[0] - end_node.position[0]) **
             #            2) + ((child.position[1] - end_node.position[1]) ** 2)
-            child.h = heuristic(child, end_node)
+            child.h = heuristic(child, end_node, current_node)
             # print("position:", child.position)
             # print("from child to goal:", child.h)
 
@@ -84,4 +85,3 @@ def a_star_bus(map, start, end):
 
             child.parent = current_node
             open_list.append(child)
-    return []

@@ -1,3 +1,5 @@
+import numpy
+import heapq
 import pprint
 import openrouteservice
 from openrouteservice.directions import directions
@@ -33,12 +35,27 @@ class Node:
             return self.id == other.id
 
 
-def heuristic(node, goal):
-    dx = abs(node.latitude - goal.latitude)
-    dy = abs(node.longitude - goal.longitude)
-    # octile distance
+def cosine_similarity(v1, v2):
+    dot_product = sum(x * y for x, y in zip(v1, v2))
+    mag_v1 = sqrt(sum(x ** 2 for x in v1))
+    mag_v2 = sqrt(sum(x ** 2 for x in v2))
+
+    if mag_v1 == 0 or mag_v2 == 0:
+        return 0  # To avoid division by zero
+
+    return dot_product / (mag_v1 * mag_v2)
+
+
+def heuristic(node, goal, current):
+    dx = node.latitude - goal.latitude
+    dy = node.longitude - goal.longitude
+    dx_cur = current.latitude - goal.latitude
+    dy_cur = current.longitude - goal.longitude
     # return (dx + dy) + (2 ** 0.5 - 2) * min(dx, dy)
-    return sqrt((dx ** 2) + (dy ** 2))
+    # A*(3) heuristics
+    return sqrt((dx ** 2) + (dy ** 2)) + sqrt((dx_cur ** 2) + (dy_cur ** 2)) \
+        + cosine_similarity((dx, dy), (dx_cur, dy_cur))
+
 
 
 def set_node_subway(map):
@@ -123,7 +140,7 @@ def route_list_end(node1, node2):
     # pp.pprint(foo)
     return foo
 
-
+"""
 def find_closest_transportation(map_bus, map_subway, coord):
     min_dist = inf
     closest_node = [[] for _ in range(2)]
@@ -142,6 +159,30 @@ def find_closest_transportation(map_bus, map_subway, coord):
             closest_node[1] = set_node_subway(map_subway[key])
             # print(min_dist, point['latitude'], point['longitude'])
     return closest_node
+"""
+
+
+def find_closest_transportation(map_bus, map_subway, coord, x=1):
+    # Initialize the heap with infinite distances
+    bus_heap = [(-sqrt(inf), None)] * x
+    subway_heap = [(-sqrt(inf), None)] * x
+
+    for key, point in map_bus.items():
+        dist = (coord[0] - point['latitude']) ** 2 + (coord[1] - point['longitude']) ** 2
+        if "adj" in map_bus[key]:
+            # Push the new node onto the heap and pop the farthest node
+            heapq.heappushpop(bus_heap, (-dist, set_node_bus(map_bus[key])))
+
+    for key, point in map_subway.items():
+        dist = (coord[0] - point['latitude']) ** 2 + (coord[1] - point['longitude']) ** 2
+        if "adj" in map_subway[key]:
+            # Push the new node onto the heap and pop the farthest node
+            heapq.heappushpop(subway_heap, (-dist, set_node_subway(map_subway[key])))
+
+    # Convert the heaps to lists and return them
+    val = [node for _, node in bus_heap], [node for _, node in subway_heap]
+    # print(val)
+    return val
 
 
 # Haversine function implemented without importing

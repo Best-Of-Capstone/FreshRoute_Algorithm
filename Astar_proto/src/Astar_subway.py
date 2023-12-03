@@ -1,7 +1,7 @@
 from utils import *
 
 
-def a_star_subway(map, trans, start, end):
+def a_star_subway(map, trans, start, end, target_count=1):
     start_node = start
     end_node = end
 
@@ -28,7 +28,7 @@ def a_star_subway(map, trans, start, end):
             current = current_node
             while current is not None:
                 # x, y = current.position
-                path.append([current.name, [current.latitude, current.longitude], "subway"])
+                path.append([current.name, [current.latitude, current.longitude], "subway", current.line])
                 # path.append([current.latitude, current.longitude])
                 current = current.parent
             return path[::-1]  # reverse
@@ -77,7 +77,7 @@ def a_star_subway(map, trans, start, end):
             child.g = current_node.g + 1
             # child.h = ((child.position[0] - end_node.position[0]) **
             #            2) + ((child.position[1] - end_node.position[1]) ** 2)
-            child.h = heuristic(child, end_node)
+            child.h = heuristic(child, end_node, current_node)
             # print("position:", child.position)
             # print("from child to goal:", child.h)
 
@@ -89,4 +89,3 @@ def a_star_subway(map, trans, start, end):
 
             child.parent = current_node
             open_list.append(child)
-    return []
