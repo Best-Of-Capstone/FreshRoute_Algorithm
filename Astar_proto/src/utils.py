@@ -1,4 +1,5 @@
 import numpy
+import heapq
 import pprint
 import openrouteservice
 from openrouteservice.directions import directions
@@ -50,8 +51,8 @@ def heuristic(node, goal, current):
     dy = node.longitude - goal.longitude
     dx_cur = current.latitude - goal.latitude
     dy_cur = current.longitude - goal.longitude
-    # A*(3) heuristics
     # return (dx + dy) + (2 ** 0.5 - 2) * min(dx, dy)
+    # A*(3) heuristics
     return sqrt((dx ** 2) + (dy ** 2)) + sqrt((dx_cur ** 2) + (dy_cur ** 2)) \
         + cosine_similarity((dx, dy), (dx_cur, dy_cur))
 
@@ -139,7 +140,7 @@ def route_list_end(node1, node2):
     # pp.pprint(foo)
     return foo
 
-
+"""
 def find_closest_transportation(map_bus, map_subway, coord):
     min_dist = inf
     closest_node = [[] for _ in range(2)]
@@ -158,6 +159,30 @@ def find_closest_transportation(map_bus, map_subway, coord):
             closest_node[1] = set_node_subway(map_subway[key])
             # print(min_dist, point['latitude'], point['longitude'])
     return closest_node
+"""
+
+
+def find_closest_transportation(map_bus, map_subway, coord, x=1):
+    # Initialize the heap with infinite distances
+    bus_heap = [(-sqrt(inf), None)] * x
+    subway_heap = [(-sqrt(inf), None)] * x
+
+    for key, point in map_bus.items():
+        dist = (coord[0] - point['latitude']) ** 2 + (coord[1] - point['longitude']) ** 2
+        if "adj" in map_bus[key]:
+            # Push the new node onto the heap and pop the farthest node
+            heapq.heappushpop(bus_heap, (-dist, set_node_bus(map_bus[key])))
+
+    for key, point in map_subway.items():
+        dist = (coord[0] - point['latitude']) ** 2 + (coord[1] - point['longitude']) ** 2
+        if "adj" in map_subway[key]:
+            # Push the new node onto the heap and pop the farthest node
+            heapq.heappushpop(subway_heap, (-dist, set_node_subway(map_subway[key])))
+
+    # Convert the heaps to lists and return them
+    val = [node for _, node in bus_heap], [node for _, node in subway_heap]
+    # print(val)
+    return val
 
 
 # Haversine function implemented without importing

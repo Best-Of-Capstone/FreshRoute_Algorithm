@@ -1,7 +1,7 @@
 from utils import *
 
 
-def a_star_subway(map, trans, start, end):
+def a_star_subway(map, trans, start, end, target_count=1):
     start_node = start
     end_node = end
 
@@ -89,4 +89,3 @@ def a_star_subway(map, trans, start, end):
 
             child.parent = current_node
             open_list.append(child)
-    return []
